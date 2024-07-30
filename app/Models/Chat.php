@@ -14,28 +14,25 @@ class Chat extends Model
     protected $table = 'chats';
     protected $guarded = ['id'];
 
-
-    
     public function participants(): HasMany
     {
-        return $this->hasMany(ChatParticipant::class,'chat_id');
+        return $this->hasMany(ChatParticipant::class, 'chat_id');
     }
 
     public function messages(): HasMany
     {
-        return $this->hasMany(ChatMessage::class,'chat_id');
+        return $this->hasMany(ChatMessage::class, 'chat_id');
     }
 
     public function lastMessage(): HasOne
     {
-        return $this->hasOne(ChatMessage::class,'chat_id')->lastest ('updated_at');
+        return $this->hasOne(ChatMessage::class, 'chat_id')->latest('updated_at');
     }
 
-    public function scoopHasParticipants($query, int $userId){
-
-        return $query->whereHas('participants', function($q) use ($userId){
-            $q -> where('user_id', $userId);
-        }
-    );
+    public function scopeHasParticipants($query, int $userId)
+    {
+        return $query->whereHas('participants', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        });
     }
 }

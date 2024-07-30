@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\ChatController;
+use App\Http\Controllers\ChatMessageController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
@@ -17,4 +19,7 @@ Route::prefix('/auth')->group(function () {
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('chat', ChatController::class)->only(['index', 'store', 'show']);
+    Route::apiResource('chat_message', ChatMessageController::class)->only(['index', 'store']);
+    Route::apiResource('user', UserController::class)->only(['index']);
+
 });

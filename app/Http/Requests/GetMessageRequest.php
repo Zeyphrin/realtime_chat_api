@@ -3,14 +3,14 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Models\User;
+use App\Models\Chat;
 
-class StoreChatRequest extends FormRequest
+class GetMessageRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
-    public function authorize()
+    public function authorize(): bool
     {
         return true;
     }
@@ -20,14 +20,14 @@ class StoreChatRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules()
+     public function rules()
     {
-        $userModel = get_class(new User()); 
+        $chatModel = get_class(new Chat());
 
         return [
-            'user_id' => "required|exists:{$userModel},id",
-            'name' => 'nullable|string',
-            'is_private' => 'nullable|boolean'
+            'chat_id' => "required|exists:{$chatModel},id",
+            'page' => 'required|numeric',
+            'page_size' => 'nullable|numeric',
         ];
     }
 }
