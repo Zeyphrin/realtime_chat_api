@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Notifications\MessageSent;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -32,5 +33,14 @@ class User extends Authenticatable
     public function createNewToken($name, array $abilities = ['*'])
     {
         return $this->createToken($name, $abilities)->plainTextToken;
+    }
+
+    public function routeNotificationForOneSignal() : array{
+        return ['tags'=>['key'=>'userId','relation'=>'=', 'value'=>(string)(1)]];
+    }
+
+
+    public function sendNowMessageNotification(array $data) : void {
+        $this->notify(new MessageSent($data));
     }
 }

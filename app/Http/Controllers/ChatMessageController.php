@@ -7,6 +7,11 @@ use App\Http\Requests\StoreMessageRequest;
 use Illuminate\Http\Request;
 use App\Models\ChatMessage;
 use Illuminate\Http\JsonResponse;
+use App\Events\NewMessageSent;
+use App\Models\Chat;
+use App\Models\User;
+
+
 
 class ChatMessageController extends Controller
 {
@@ -24,7 +29,10 @@ class ChatMessageController extends Controller
             $pageSize,
             ['*'],
             'page',
-            $currentPage
+            $currentPage        
+
+
+            
         );
         return $this->success(
             $messages -> getCollection()
@@ -38,7 +46,38 @@ class ChatMessageController extends Controller
         $chatMessage = ChatMessage::create($data);
         $chatMessage->load('user');
 
+        $this->sendNotificationToOther($chatMessage);
+
         return $this->success($chatMessage, 'pesan sudah terkirim ');
 
+    }
+
+    private function sendNotificationToOther(ChatMessage $chatMessage) : void{
+        $chatId = $chatMessage->chat_id;
+
+        broadcast(new NewMessageSent($chatMessage))->toOthers();
+
+        $user = auth()->user();
+        $userId = $user->id;
+
+        $chat = Chat::where('id', $chatMessage->chat_id)
+            ->with(['participants' =>  function($query) use ($userId){
+                $query->where('user_id', '!=', $userId);
+            }])
+            ->first();
+
+            if ($chat->participants->count() > 0) {
+                $otherUserId = $chat->participants->first()->user_id;
+        
+                $otherUser = User::where('id', $otherUserId)->first();
+                $otherUser->sendNowMessageNotification([
+                    'messageData' => [
+                        'senderName'=> $user->username,
+                        'message'=> $chatMessage->message,
+                        'chatId'=> $chatMessage->chat_id
+                    ]
+                ]);
+
+        }
     }
 }
